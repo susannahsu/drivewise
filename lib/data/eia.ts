@@ -6,6 +6,7 @@ import {
   fallbackGasPerGallon,
 } from "./fallbacks";
 import type { Priced } from "./priced";
+import { gasDuoarea } from "./gas-regions";
 
 /**
  * U.S. Energy Information Administration (EIA) Open Data API v2.
@@ -66,12 +67,27 @@ export async function getElectricityPerKwh(state: UsState): Promise<Priced> {
   });
 }
 
-/** Regular gasoline price for a state, in $/gallon. */
+/**
+ * Regular gasoline price for a state, in $/gallon. EIA publishes weekly retail
+ * gas for 9 states directly and PADD regions for the rest, so we query the
+ * best-granularity series (see gas-regions.ts) and only fall back if the API is
+ * unavailable.
+ */
 export async function getGasPerGallon(state: UsState): Promise<Priced> {
   return cached(`gas:${state}`, TTL.ENERGY, async () => {
-    // EIA gas coverage is limited; the fallback table fills the gaps. A future
-    // pass can map uncovered states to their PADD region. For now we use the
-    // fallback unless we later add a verified per-state series mapping.
+    try {
+      const { duoarea } = gasDuoarea(state);
+      const dollars = await eiaLatestValue("/petroleum/pri/gnd/data/", {
+        "facets[duoarea][]": duoarea,
+        "facets[product][]": "EPMR", // regular, all formulations
+        "facets[process][]": "PTE", // retail sales
+        "data[0]": "value",
+        frequency: "weekly",
+      });
+      if (dollars != null && dollars > 0) return { value: dollars, live: true };
+    } catch {
+      /* fall through to fallback */
+    }
     return { value: fallbackGasPerGallon(state), live: false };
   });
 }
