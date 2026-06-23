@@ -22,7 +22,9 @@ your real ownership horizon, break-even analysis, sensitivity to gas-price
 shocks, and a "honestly, don't buy anything yet" answer when that's the right
 call.
 
-> Status: **Spec / planning phase.** No code yet. See [`docs/SPEC.md`](docs/SPEC.md).
+> Status: **Phase 0 complete** — Next.js app scaffolded and building, with the
+> core schema and TCO-engine skeleton in place. The four decision views are
+> stubs. See [`docs/SPEC.md`](docs/SPEC.md) for the roadmap.
 
 ## Why this exists
 
@@ -48,6 +50,21 @@ slice or comparison built on top of it. Build the engine once; reuse everywhere.
 
 ## Getting started
 
-Not buildable yet — this repo currently holds the spec. Implementation phases
-are in [`docs/SPEC.md`](docs/SPEC.md). Live data sources and their gotchas are in
-[`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md).
+Requires **Node 22** (an `.nvmrc` pins it; the repo will not build on older
+Node). Then:
+
+```bash
+nvm use            # picks up .nvmrc → Node 22
+npm install
+npm run dev        # http://localhost:3000
+```
+
+Other scripts: `npm run build`, `npm run lint`.
+
+Copy `.env.example` → `.env.local` and add the free API keys (EIA, FRED) once
+the data layer is wired up in Phase 1.
+
+Implementation phases are in [`docs/SPEC.md`](docs/SPEC.md). Live data sources,
+their gotchas, and the researched free substitutes are in
+[`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md). The seed car shortlist is in
+[`docs/CAR_SHORTLIST.md`](docs/CAR_SHORTLIST.md).
