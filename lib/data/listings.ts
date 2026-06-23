@@ -40,12 +40,14 @@ export type ListingsResult =
 
 const RawListing = z
   .object({
+    vin: z.string().optional(),
     vehicle: z
       .object({
         vin: z.string().optional(),
         year: z.coerce.number().optional(),
         make: z.string().optional(),
         model: z.string().optional(),
+        trim: z.string().optional(),
       })
       .passthrough()
       .optional(),
@@ -55,9 +57,9 @@ const RawListing = z
         miles: z.coerce.number().optional(),
         city: z.string().optional(),
         state: z.string().optional(),
-        dealerName: z.string().optional(),
-        vdpUrl: z.string().optional(),
-        primaryPhotoUrl: z.string().optional(),
+        dealer: z.string().optional(),
+        vdp: z.string().optional(),
+        primaryImage: z.string().optional(),
       })
       .passthrough()
       .optional(),
@@ -73,9 +75,20 @@ export async function fetchListings(
   if (!key) return { ok: false, reason: "no_key" };
 
   try {
+    // Auto.dev indexes the base model ("Corolla"), not powertrain variants
+    // ("Corolla Hybrid"), so strip the suffix to get results.
+    const baseModel = query.model
+      .replace(/\b(Plug-in Hybrid|Hybrid|PHEV|EV)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // Constrain to recent model years — when shopping a near-new car, a
+    // decade-old high-mileage example isn't a useful comparison.
+    const thisYear = new Date().getFullYear();
     const url = new URL(AUTO_DEV_BASE);
     url.searchParams.set("vehicle.make", query.make);
-    url.searchParams.set("vehicle.model", query.model);
+    url.searchParams.set("vehicle.model", baseModel);
+    url.searchParams.set("vehicle.year", `${thisYear - 5}-${thisYear + 1}`);
     if (query.zip) {
       url.searchParams.set("zip", query.zip);
       url.searchParams.set("distance", String(query.radiusMiles ?? 50));
@@ -100,23 +113,24 @@ export async function fetchListings(
     const listings: Listing[] = parsed.data.data.map((row) => {
       const v = row.vehicle ?? {};
       const r = row.retailListing ?? {};
-      const vin = v.vin;
+      const vin = row.vin ?? v.vin;
+      const model = [v.model ?? query.model, v.trim].filter(Boolean).join(" ");
       return {
         vin,
         year: v.year,
         make: v.make ?? query.make,
-        model: v.model ?? query.model,
+        model,
         price: r.price,
         miles: r.miles,
         city: r.city,
         state: r.state,
-        dealer: r.dealerName,
+        dealer: r.dealer,
         url:
-          r.vdpUrl ??
+          r.vdp ??
           (vin
             ? `https://www.google.com/search?q=${encodeURIComponent(`${v.year ?? ""} ${query.make} ${query.model} ${vin}`)}`
             : "#"),
-        photoUrl: r.primaryPhotoUrl,
+        photoUrl: r.primaryImage,
       };
     });
 
