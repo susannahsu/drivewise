@@ -108,24 +108,48 @@ export function recommend(
     (v) => matchesBody(v, a.bodyStylePref) && v.msrp <= a.budgetMax,
   );
   const pool = eligible.length ? eligible : SEED_VEHICLES;
-  const ranked = pool
-    .map((vehicle) => ({
-      vehicle,
-      result: computeTco(vehicle, profile, market),
-      resaleRatio:
-        vehicle.resaleRatio5yr ?? RESALE_RATIO_5YR[vehicle.bodyStyle],
-    }))
-    .sort((x, y) => {
-      switch (a.objective) {
-        case "lowest_tco":
-          return x.result.total - y.result.total;
-        case "best_efficiency":
-          return (y.vehicle.combinedMpg ?? 0) - (x.vehicle.combinedMpg ?? 0);
-        case "slowest_depreciation":
-          return y.resaleRatio - x.resaleRatio;
-      }
-    });
+
+  const score = (vehicle: Vehicle) => ({
+    vehicle,
+    result: computeTco(vehicle, profile, market),
+    resaleRatio: vehicle.resaleRatio5yr ?? RESALE_RATIO_5YR[vehicle.bodyStyle],
+  });
+  const byObjective = (
+    x: ReturnType<typeof score>,
+    y: ReturnType<typeof score>,
+  ) => {
+    switch (a.objective) {
+      case "lowest_tco":
+        return x.result.total - y.result.total;
+      case "best_efficiency":
+        return (y.vehicle.combinedMpg ?? 0) - (x.vehicle.combinedMpg ?? 0);
+      case "slowest_depreciation":
+        return y.resaleRatio - x.resaleRatio;
+    }
+  };
+
+  // Full eligible ranking — used for the cross-powertrain alternatives so the
+  // user still sees (e.g.) the cheapest gas option even when we pick a hybrid.
+  const rankedAll = pool.map(score).sort(byObjective);
+
+  // Honor the winning powertrain downstream: pick the best model OF that
+  // powertrain when the eligible pool has any; otherwise fall back to the
+  // overall best (e.g. EV wins but the shortlist has no EVs yet).
+  const winnerPool = pool.filter((v) => v.powertrain === powertrainWinner);
+  const powertrainHonored = winnerPool.length > 0;
+  const ranked = (powertrainHonored ? winnerPool : pool)
+    .map(score)
+    .sort(byObjective);
   const top = ranked[0];
+
+  // Did honoring the powertrain cost us a cheaper model of another powertrain?
+  const overallCheapest = rankedAll[0];
+  const tradeoff =
+    powertrainHonored &&
+    overallCheapest.vehicle.id !== top.vehicle.id &&
+    overallCheapest.result.total < top.result.total
+      ? overallCheapest
+      : null;
 
   // 3) Acquisition for the picked model.
   const usedPrice = Math.round(resaleValueAtAge(top.vehicle, USED_AGE_YEARS));
@@ -154,8 +178,15 @@ export function recommend(
   ];
   acquisition.sort((x, y) => x.total - y.total);
 
-  // 4) Own vs rideshare for the commute.
-  const ownMonthly = top.result.perMonth;
+  // 4) Own vs rideshare — compare like-for-like on the commute only, so the
+  // owned cost is the picked car driven just the commute miles (matching the
+  // standalone own-vs-rideshare view), not its full-mileage TCO.
+  const commuteMiles = a.oneWayMiles * 2 * a.daysPerWeek * 52;
+  const ownMonthly = computeTco(
+    top.vehicle,
+    profileFor(a, commuteMiles),
+    market,
+  ).perMonth;
   const rideMonthly = monthlyRideshareCost(
     {
       oneWayMiles: a.oneWayMiles,
@@ -174,18 +205,26 @@ export function recommend(
     ? `At your mileage, rideshare may beat owning — but if you buy, ${lowerFirst(ACQ_PHRASE[bestAcq.key])} ${carName}`
     : `${ACQ_PHRASE[bestAcq.key]} ${carName}`;
 
+  const winnerModelCount = powertrainHonored
+    ? pool.filter((v) => v.powertrain === powertrainWinner).length
+    : pool.length;
   const rationale = [
     `Cheapest powertrain for your driving: ${PT_LABEL[powertrainWinner]}${
       !a.homeCharging && powertrainWinner !== "ev"
         ? " (no home charging makes a full EV hard to justify)"
         : ""
     }.`,
-    `${top.vehicle.make} ${top.vehicle.model} ranks #1 of ${pool.length} eligible models for "${objectiveLabel(a.objective)}" — ${top.vehicle.combinedMpg ?? "—"} mpg, ${Math.round(top.resaleRatio * 100)}% resale, ${moneyStr(top.result.total)} over ${profile.ownershipYears} yrs.`,
+    `${top.vehicle.make} ${top.vehicle.model} is the best ${powertrainHonored ? PT_LABEL[powertrainWinner].toLowerCase() + " " : ""}match of ${winnerModelCount} eligible for "${objectiveLabel(a.objective)}" — ${top.vehicle.combinedMpg ?? "—"} mpg, ${Math.round(top.resaleRatio * 100)}% resale, ${moneyStr(top.result.total)} over ${profile.ownershipYears} yrs.`,
     `${bestAcq.label} is the cheapest way to pay: ${moneyStr(bestAcq.total)} (${moneyStr(bestAcq.perMonth)}/mo).`,
     rideshareCheaper
       ? `You drive little enough (${a.daysPerWeek} commute days/wk) that rideshare (${moneyStr(rideMonthly)}/mo) undercuts owning (${moneyStr(ownMonthly)}/mo) — worth a hard look before buying.`
       : `Owning (${moneyStr(ownMonthly)}/mo) beats rideshare (${moneyStr(rideMonthly)}/mo) at your commute.`,
   ];
+  if (tradeoff) {
+    rationale.push(
+      `If you'd rather minimize cost outright, the ${tradeoff.vehicle.make} ${tradeoff.vehicle.model} (${PT_LABEL[tradeoff.vehicle.powertrain]}) is ${moneyStr(top.result.total - tradeoff.result.total)} cheaper — shown as an alternative.`,
+    );
+  }
 
   return {
     powertrainWinner,
@@ -195,8 +234,11 @@ export function recommend(
     })),
     model: top.vehicle,
     modelResult: top.result,
-    modelAlternatives: ranked
-      .slice(1, 4)
+    // Alternatives come from the full eligible pool (cross-powertrain) so the
+    // user sees the next-best options regardless of powertrain.
+    modelAlternatives: rankedAll
+      .filter((r) => r.vehicle.id !== top.vehicle.id)
+      .slice(0, 3)
       .map((r) => ({ vehicle: r.vehicle, total: r.result.total })),
     acquisition,
     rideshare: { ownMonthly, rideMonthly, rideshareCheaper },

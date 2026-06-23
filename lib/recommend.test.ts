@@ -55,4 +55,20 @@ describe("recommend", () => {
     const r = recommend({ ...base, daysPerWeek: 1, oneWayMiles: 3 }, market);
     expect(r.rideshare.rideshareCheaper).toBe(true);
   });
+
+  it("couples the model pick to the winning powertrain when possible", () => {
+    const r = recommend(base, market);
+    // Hybrid wins for this no-home-charging profile, and the budget admits
+    // hybrids, so the recommended model should itself be a hybrid.
+    expect(r.powertrainWinner).toBe("hybrid");
+    expect(r.model.powertrain).toBe("hybrid");
+  });
+
+  it("alternatives can span other powertrains for context", () => {
+    const r = recommend(base, market);
+    expect(r.modelAlternatives.length).toBeGreaterThan(0);
+    expect(r.modelAlternatives.every((alt) => alt.vehicle.id !== r.model.id)).toBe(
+      true,
+    );
+  });
 });
