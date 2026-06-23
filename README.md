@@ -22,9 +22,10 @@ your real ownership horizon, break-even analysis, sensitivity to gas-price
 shocks, and a "honestly, don't buy anything yet" answer when that's the right
 call.
 
-> Status: **Phase 0 complete** — Next.js app scaffolded and building, with the
-> core schema and TCO-engine skeleton in place. The four decision views are
-> stubs. See [`docs/SPEC.md`](docs/SPEC.md) for the roadmap.
+> Status: **Phase 1 complete** — the Total Cost of Ownership engine is fully
+> implemented and tested (46 tests), wired to a live data layer (EIA, FRED) with
+> offline fallbacks, and runs end-to-end over the 20-car seed catalog. The four
+> decision *views* (Phase 2) are still stubs. See [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Why this exists
 
@@ -59,7 +60,11 @@ npm install
 npm run dev        # http://localhost:3000
 ```
 
-Other scripts: `npm run build`, `npm run lint`.
+Other scripts: `npm run build`, `npm run lint`, `npm test` (vitest).
+
+The TCO engine lives in [`lib/tco/`](lib/tco) (pure, tested functions) and the
+live-data fetchers in [`lib/data/`](lib/data). Both run without API keys thanks
+to offline fallbacks; add the keys below to get live prices.
 
 Copy `.env.example` → `.env.local` and add the free API keys (EIA, FRED) once
 the data layer is wired up in Phase 1.

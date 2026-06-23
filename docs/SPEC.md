@@ -219,10 +219,14 @@ docs/
 - Next.js + TS + Tailwind + Zod + Recharts. CI lint/typecheck/test. `.env` for
   API keys (EIA, FRED). This spec lives in repo.
 
-**Phase 1 — TCO engine + data layer**
-- Implement `lib/tco/*` pure functions with sane defaults and unit tests.
-- Wire EIA (energy), FRED (rates), fueleconomy.gov + NHTSA (vehicles) with
-  caching. Seed a ~20-model catalog by hand.
+**Phase 1 — TCO engine + data layer** ✅ _done_
+- ✅ `lib/tco/*` pure functions (depreciation, energy, financing, insurance,
+  maintenance, fees) composed in `computeTco`, with 46 unit tests.
+- ✅ EIA (electricity) + FRED (loan rates) wired with caching and offline
+  fallbacks; gas uses the fallback table given EIA's limited state coverage.
+- ✅ 20-model seed catalog, validated and exercised end-to-end.
+- ⏭️ Still to calibrate: verify seed mpg/resale against fueleconomy.gov;
+  add NHTSA reliability + Auto.dev listings when US-3 needs them.
 
 **Phase 2 — The four decision views (shallow)**
 - US-1 powertrain, US-2 own-vs-Uber (modeled fares), US-3 model picker
