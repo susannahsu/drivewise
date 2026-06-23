@@ -35,15 +35,31 @@ export function moneyFactorFromApr(apr: number): number {
   return apr / 24; // apr is a decimal here, so /24 == (apr*100)/2400
 }
 
+export interface LeasePaymentParts {
+  depreciation: number;
+  finance: number;
+  total: number;
+}
+
+/** Monthly lease payment split into its depreciation and finance portions. */
+export function leasePaymentParts(
+  capCost: number,
+  residual: number,
+  apr: number,
+  termMonths: number,
+): LeasePaymentParts {
+  const depreciation = (capCost - residual) / termMonths;
+  const finance = (capCost + residual) * moneyFactorFromApr(apr);
+  return { depreciation, finance, total: depreciation + finance };
+}
+
 export function monthlyLeasePayment(
   capCost: number,
   residual: number,
   apr: number,
   termMonths: number,
 ): number {
-  const depreciation = (capCost - residual) / termMonths;
-  const finance = (capCost + residual) * moneyFactorFromApr(apr);
-  return depreciation + finance;
+  return leasePaymentParts(capCost, residual, apr, termMonths).total;
 }
 
 /**
