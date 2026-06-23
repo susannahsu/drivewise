@@ -49,17 +49,35 @@ export default function Home() {
         </p>
       </header>
 
-      <section className="grid gap-3 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800 sm:grid-cols-3">
+      <section className="flex flex-col gap-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Not sure where to start?</h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            Answer 7 quick questions and we&apos;ll recommend exactly what to buy
+            (and how to pay for it) — then show the four decisions behind it.
+          </p>
+        </div>
+        <Link
+          href="/guide"
+          className="self-start rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          Start the guided flow →
+        </Link>
+      </section>
+
+      <div className="grid gap-3 sm:grid-cols-3">
         {STEPS.map(([n, title, hint]) => (
           <div key={n} className="flex flex-col gap-1">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-xs font-bold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-200">
               {n}
             </span>
             <p className="text-sm font-medium">{title}</p>
             <p className="text-xs text-zinc-500">{hint}</p>
           </div>
         ))}
-      </section>
+      </div>
+
+      <p className="text-sm font-medium text-zinc-500">Or jump straight to one decision:</p>
 
       <section className="grid gap-4 sm:grid-cols-2">
         {DECISIONS.map((d) => (

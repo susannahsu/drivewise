@@ -83,10 +83,11 @@ const PT_LABEL: Record<string, string> = {
   hybrid: "hybrid",
   ev: "electric",
 };
-const ACQ_LABEL: Record<AcquisitionPick["key"], string> = {
-  finance_new: "finance it new",
-  buy_used: "buy it lightly used",
-  lease: "lease it",
+/** Phrased to read naturally before "<Make> <Model>". */
+const ACQ_PHRASE: Record<AcquisitionPick["key"], string> = {
+  finance_new: "Finance a new",
+  buy_used: "Buy a lightly-used",
+  lease: "Lease a",
 };
 
 export function recommend(
@@ -150,7 +151,8 @@ export function recommend(
       label: "Lease",
       ...money(computeTco(top.vehicle, profile, market, { mode: "lease" })),
     },
-  ].sort((x, y) => x.total - y.total);
+  ];
+  acquisition.sort((x, y) => x.total - y.total);
 
   // 4) Own vs rideshare for the commute.
   const ownMonthly = top.result.perMonth;
@@ -167,9 +169,10 @@ export function recommend(
 
   // Synthesize.
   const bestAcq = acquisition[0];
+  const carName = `${top.vehicle.make} ${top.vehicle.model}`;
   const headline = rideshareCheaper
-    ? `At your mileage, rideshare may beat owning — but if you buy, ${ACQ_LABEL[bestAcq.key]} a ${top.vehicle.make} ${top.vehicle.model}`
-    : `${capitalize(ACQ_LABEL[bestAcq.key])} a ${top.vehicle.make} ${top.vehicle.model}`;
+    ? `At your mileage, rideshare may beat owning — but if you buy, ${lowerFirst(ACQ_PHRASE[bestAcq.key])} ${carName}`
+    : `${ACQ_PHRASE[bestAcq.key]} ${carName}`;
 
   const rationale = [
     `Cheapest powertrain for your driving: ${PT_LABEL[powertrainWinner]}${
@@ -208,8 +211,8 @@ function money(r: TcoResult): { total: number; perMonth: number } {
 function moneyStr(n: number): string {
   return `$${Math.round(n).toLocaleString()}`;
 }
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+function lowerFirst(s: string): string {
+  return s.charAt(0).toLowerCase() + s.slice(1);
 }
 function objectiveLabel(o: RecObjective): string {
   return o === "lowest_tco"
