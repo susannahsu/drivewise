@@ -22,10 +22,10 @@ your real ownership horizon, break-even analysis, sensitivity to gas-price
 shocks, and a "honestly, don't buy anything yet" answer when that's the right
 call.
 
-> Status: **Phase 1 complete** — the Total Cost of Ownership engine is fully
-> implemented and tested (46 tests), wired to a live data layer (EIA, FRED) with
-> offline fallbacks, and runs end-to-end over the 20-car seed catalog. The four
-> decision *views* (Phase 2) are still stubs. See [`docs/SPEC.md`](docs/SPEC.md).
+> Status: **Phase 2 complete** — all four decision views are live and
+> interactive in the browser, each running the TCO engine with live (or
+> fallback) prices. 52 tests passing. Next up (Phase 3): break-even charts and
+> sensitivity sliders. See [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Why this exists
 

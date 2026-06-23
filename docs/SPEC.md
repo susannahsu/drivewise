@@ -228,10 +228,13 @@ docs/
 - ⏭️ Still to calibrate: verify seed mpg/resale against fueleconomy.gov;
   add NHTSA reliability + Auto.dev listings when US-3 needs them.
 
-**Phase 2 — The four decision views (shallow)**
-- US-1 powertrain, US-2 own-vs-Uber (modeled fares), US-3 model picker
-  (weighted ranking over seed list), US-4 acquisition. Each renders a cost
-  breakdown + break-even.
+**Phase 2 — The four decision views (shallow)** ✅ _done_
+- ✅ US-1 powertrain (gas/hybrid/EV head-to-head, live prices, breakdown).
+- ✅ US-2 own-vs-rideshare (modeled surge fares + break-even days/week).
+- ✅ US-3 model picker (ranks the 20-car seed list by chosen objective).
+- ✅ US-4 acquisition (finance-new vs buy-used vs lease, cheapest highlighted).
+- Shared: localStorage-persisted profile, CostBreakdown bars, server actions
+  that fetch market data and run the engine. Verified end-to-end in-browser.
 
 **Phase 3 — Persuasion layer**
 - Break-even charts, sensitivity sliders, "show your work" breakdowns,
