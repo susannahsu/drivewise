@@ -81,6 +81,8 @@ export const VehicleSchema = z.object({
   kwhPer100mi: z.number().positive().optional(),
   /** Fraction of MSRP retained after `ownershipYears` (segment default). */
   resaleRatio5yr: z.number().min(0).max(1).optional(),
+  /** 0–1 reliability proxy (NHTSA recalls + brand baseline; higher = better). */
+  reliability: z.number().min(0).max(1).optional(),
 });
 export type Vehicle = z.infer<typeof VehicleSchema>;
 

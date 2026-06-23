@@ -7,6 +7,7 @@ export const OBJECTIVES = {
   lowest_tco: "Lowest total cost",
   best_efficiency: "Best fuel efficiency",
   slowest_depreciation: "Holds value best",
+  most_reliable: "Most reliable",
 } as const;
 
 export type Objective = keyof typeof OBJECTIVES;

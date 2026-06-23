@@ -64,6 +64,11 @@ describe("recommend", () => {
     expect(r.model.powertrain).toBe("hybrid");
   });
 
+  it("most-reliable objective picks a high-reliability model", () => {
+    const r = recommend({ ...base, objective: "most_reliable" }, market);
+    expect(r.model.reliability ?? 0).toBeGreaterThanOrEqual(0.8);
+  });
+
   it("alternatives can span other powertrains for context", () => {
     const r = recommend(base, market);
     expect(r.modelAlternatives.length).toBeGreaterThan(0);

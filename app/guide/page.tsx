@@ -181,6 +181,7 @@ export default function GuidePage() {
                 { value: "lowest_tco", label: "Lowest total cost", hint: "Cheapest to own, all-in" },
                 { value: "best_efficiency", label: "Best fuel economy", hint: "Fewest gallons / kWh" },
                 { value: "slowest_depreciation", label: "Holds value best", hint: "Strongest resale" },
+                { value: "most_reliable", label: "Most reliable", hint: "Fewest recalls, best brand record" },
               ]}
               value={a.objective}
               onChange={(v) => set("objective", v as RecObjective)}

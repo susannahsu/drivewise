@@ -71,6 +71,8 @@ export default function ModelPickerPage() {
           return (b.vehicle.combinedMpg ?? 0) - (a.vehicle.combinedMpg ?? 0);
         case "slowest_depreciation":
           return b.resaleRatio - a.resaleRatio;
+        case "most_reliable":
+          return (b.vehicle.reliability ?? 0) - (a.vehicle.reliability ?? 0);
       }
     });
     return list;
@@ -175,6 +177,9 @@ export default function ModelPickerPage() {
                       {PT_LABEL[row.vehicle.powertrain]} ·{" "}
                       {row.vehicle.combinedMpg ?? "—"} mpg ·{" "}
                       {Math.round(row.resaleRatio * 100)}% resale
+                      {row.vehicle.reliability != null && (
+                        <> · {Math.round(row.vehicle.reliability * 100)} reliability</>
+                      )}
                     </span>
                   </div>
                 </div>

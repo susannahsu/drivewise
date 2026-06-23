@@ -17,7 +17,8 @@ import {
 export type RecObjective =
   | "lowest_tco"
   | "best_efficiency"
-  | "slowest_depreciation";
+  | "slowest_depreciation"
+  | "most_reliable";
 
 export type BodyStylePref = "any" | "sedan" | "suv";
 
@@ -125,6 +126,8 @@ export function recommend(
         return (y.vehicle.combinedMpg ?? 0) - (x.vehicle.combinedMpg ?? 0);
       case "slowest_depreciation":
         return y.resaleRatio - x.resaleRatio;
+      case "most_reliable":
+        return (y.vehicle.reliability ?? 0) - (x.vehicle.reliability ?? 0);
     }
   };
 
@@ -261,5 +264,7 @@ function objectiveLabel(o: RecObjective): string {
     ? "lowest total cost"
     : o === "best_efficiency"
       ? "best efficiency"
-      : "holds value best";
+      : o === "slowest_depreciation"
+        ? "holds value best"
+        : "most reliable";
 }
