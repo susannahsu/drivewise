@@ -12,7 +12,7 @@ import { estimateAnnualInsurance } from "@/lib/tco/insurance";
 import { ANNUAL_REGISTRATION } from "@/lib/tco/defaults";
 import type { DrivingProfile, UsState } from "@/lib/schema";
 import { money, moneyCents, perMile } from "@/lib/format";
-import { fetchMarket } from "./actions";
+import { fetchMarket } from "../_market";
 
 const POWERTRAIN_LABEL: Record<string, string> = {
   gas: "Gas",
