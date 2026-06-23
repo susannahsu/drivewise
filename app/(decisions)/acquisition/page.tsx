@@ -5,6 +5,7 @@ import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { CostBreakdown } from "@/components/CostBreakdown";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { CarImage } from "@/components/CarImage";
+import { DealerFinder } from "@/components/DealerFinder";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import { money } from "@/lib/format";
 import {
@@ -117,6 +118,12 @@ export default function AcquisitionPage() {
               <CostBreakdown result={opt.result} />
             </div>
           ))}
+
+          <DealerFinder
+            make={selected.make}
+            model={selected.model}
+            state={profile.state}
+          />
         </section>
       )}
     </main>

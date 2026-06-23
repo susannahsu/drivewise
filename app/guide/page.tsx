@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CarImage } from "@/components/CarImage";
+import { DealerFinder } from "@/components/DealerFinder";
 import { saveProfile } from "@/components/ProfileFields";
 import { US_STATES, type UsState } from "@/lib/schema";
 import { money } from "@/lib/format";
@@ -60,7 +61,17 @@ export default function GuidePage() {
     }
   }
 
-  if (rec) return <Dashboard rec={rec} onRestart={() => { setRec(null); setStep(0); }} />;
+  if (rec)
+    return (
+      <Dashboard
+        rec={rec}
+        state={a.state}
+        onRestart={() => {
+          setRec(null);
+          setStep(0);
+        }}
+      />
+    );
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-8 px-6 py-12">
@@ -237,7 +248,15 @@ function Choice({ options, value, onChange }: { options: { value: string; label:
   );
 }
 
-function Dashboard({ rec, onRestart }: { rec: Recommendation; onRestart: () => void }) {
+function Dashboard({
+  rec,
+  state,
+  onRestart,
+}: {
+  rec: Recommendation;
+  state: string;
+  onRestart: () => void;
+}) {
   const maxPt = Math.max(...rec.powertrainTotals.map((p) => p.total));
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-12">
@@ -324,6 +343,12 @@ function Dashboard({ rec, onRestart }: { rec: Recommendation; onRestart: () => v
           </div>
         </ModuleCard>
       </section>
+
+      <DealerFinder
+        make={rec.model.make}
+        model={rec.model.model}
+        state={state}
+      />
 
       <p className="text-xs text-zinc-400">
         Your answers are saved, so each detailed page above opens pre-filled with
