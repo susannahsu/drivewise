@@ -115,6 +115,12 @@ export async function fetchListings(
       const r = row.retailListing ?? {};
       const vin = row.vin ?? v.vin;
       const model = [v.model ?? query.model, v.trim].filter(Boolean).join(" ");
+      // vdp is unreliable — sometimes a bare fragment like "#-12345". Only use
+      // it when it's a real URL; otherwise search by VIN, which always resolves.
+      const vdp = typeof r.vdp === "string" && /^https?:\/\//.test(r.vdp);
+      const vinSearch = vin
+        ? `https://www.google.com/search?q=${encodeURIComponent(`${v.year ?? ""} ${query.make} ${query.model} ${vin} for sale`)}`
+        : "#";
       return {
         vin,
         year: v.year,
@@ -125,11 +131,7 @@ export async function fetchListings(
         city: r.city,
         state: r.state,
         dealer: r.dealer,
-        url:
-          r.vdp ??
-          (vin
-            ? `https://www.google.com/search?q=${encodeURIComponent(`${v.year ?? ""} ${query.make} ${query.model} ${vin}`)}`
-            : "#"),
+        url: vdp ? (r.vdp as string) : vinSearch,
         photoUrl: r.primaryImage,
       };
     });

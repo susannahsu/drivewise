@@ -15,6 +15,7 @@ import {
   type Recommendation,
 } from "@/lib/recommend";
 import { fetchMarket } from "@/app/(decisions)/_market";
+import { OBJECTIVES } from "@/app/(decisions)/model-picker/objectives";
 
 const TOTAL = 7;
 
@@ -66,6 +67,7 @@ export default function GuidePage() {
       <Dashboard
         rec={rec}
         state={a.state}
+        objective={a.objective}
         onRestart={() => {
           setRec(null);
           setStep(0);
@@ -251,10 +253,12 @@ function Choice({ options, value, onChange }: { options: { value: string; label:
 function Dashboard({
   rec,
   state,
+  objective,
   onRestart,
 }: {
   rec: Recommendation;
   state: string;
+  objective: RecObjective;
   onRestart: () => void;
 }) {
   const maxPt = Math.max(...rec.powertrainTotals.map((p) => p.total));
@@ -288,6 +292,12 @@ function Dashboard({
             </li>
           ))}
         </ul>
+        <p className="text-xs text-zinc-500">
+          Optimized for <strong>{OBJECTIVES[objective].toLowerCase()}</strong>.
+          Hit “Adjust answers” and change your priority (or body style / budget)
+          to see different picks — e.g. holds-value favors the Civic Hybrid,
+          reliability the Corolla Cross.
+        </p>
       </section>
 
       <p className="text-sm text-zinc-500">
