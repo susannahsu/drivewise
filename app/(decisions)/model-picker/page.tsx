@@ -4,12 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { money } from "@/lib/format";
-import {
-  OBJECTIVES,
-  rankModels,
-  type ModelRow,
-  type Objective,
-} from "./actions";
+import { rankModels, type ModelRow } from "./actions";
+import { OBJECTIVES, type Objective } from "./objectives";
 
 const PT_LABEL: Record<string, string> = {
   gas: "Gas",

@@ -10,14 +10,7 @@ import { computeTco } from "@/lib/tco";
 import { getMarketInputs } from "@/lib/data/market";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import { RESALE_RATIO_5YR } from "@/lib/tco/defaults";
-
-export const OBJECTIVES = {
-  lowest_tco: "Lowest total cost",
-  best_efficiency: "Best fuel efficiency",
-  slowest_depreciation: "Holds value best",
-} as const;
-
-export type Objective = keyof typeof OBJECTIVES;
+import type { Objective } from "./objectives";
 
 export interface ModelInput {
   state: string;
