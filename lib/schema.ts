@@ -86,17 +86,22 @@ export type Vehicle = z.infer<typeof VehicleSchema>;
 
 // --- TCO result ------------------------------------------------------------
 
+/**
+ * Additive ledger: every field is a positive cost in dollars and they sum to
+ * `total`. Resale is NOT a separate line — it's already netted out of
+ * `depreciation` (= purchase price − resale value) to avoid double counting.
+ */
 export const TcoBreakdownSchema = z.object({
   depreciation: z.number(),
   financingInterest: z.number(),
   energy: z.number(),
   insurance: z.number(),
   maintenance: z.number(),
+  /** Sales tax + registration + title fees. */
   fees: z.number(),
   parking: z.number(),
   tolls: z.number(),
-  /** Negative — resale value recovered at end of horizon. */
-  resaleCredit: z.number(),
+  /** Opportunity cost of capital tied up (down payment / cash). */
   opportunityCost: z.number(),
 });
 export type TcoBreakdown = z.infer<typeof TcoBreakdownSchema>;
@@ -108,7 +113,9 @@ export const TcoResultSchema = z.object({
   perMonth: z.number(),
   perMile: z.number(),
   breakdown: TcoBreakdownSchema,
-  /** Year-by-year cumulative cost, for break-even charts. */
+  /** Estimated resale value at end of horizon (informational, not a cost). */
+  resaleValue: z.number(),
+  /** Year-by-year cumulative net cost, for break-even charts. */
   cumulativeByYear: z.array(z.number()),
 });
 export type TcoResult = z.infer<typeof TcoResultSchema>;
