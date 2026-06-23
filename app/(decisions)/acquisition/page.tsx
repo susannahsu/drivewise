@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { CostBreakdown } from "@/components/CostBreakdown";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
+import { CarImage } from "@/components/CarImage";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import { money } from "@/lib/format";
 import {
@@ -17,6 +17,7 @@ export default function AcquisitionPage() {
   const [vehicleId, setVehicleId] = useState(SEED_VEHICLES[0].id);
   const [analysis, setAnalysis] = useState<AcquisitionAnalysis | null>(null);
   const [pending, setPending] = useState(false);
+  const selected = SEED_VEHICLES.find((v) => v.id === vehicleId)!;
 
   async function run() {
     setPending(true);
@@ -30,10 +31,7 @@ export default function AcquisitionPage() {
   return (
     <main className="mx-auto flex max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
       <div>
-        <Link href="/" className="text-sm text-zinc-500 hover:underline">
-          ← all decisions
-        </Link>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight">
           Lease, buy new, or buy used?
         </h1>
         <p className="mt-1 text-zinc-600 dark:text-zinc-300">
@@ -69,13 +67,20 @@ export default function AcquisitionPage() {
 
       {analysis && (
         <section className="flex flex-col gap-5">
-          <p className="text-sm text-zinc-500">
-            {analysis.vehicleLabel} — cheapest:{" "}
-            <span className="font-semibold text-emerald-600">
-              {analysis.options[0].label}
-            </span>{" "}
-            at {money(analysis.options[0].result.total)}
-          </p>
+          <div className="flex items-center gap-4">
+            <CarImage
+              make={selected.make}
+              model={selected.model}
+              className="h-14 w-24 shrink-0 rounded-md"
+            />
+            <p className="text-sm text-zinc-500">
+              {analysis.vehicleLabel} — cheapest:{" "}
+              <span className="font-semibold text-emerald-600">
+                {analysis.options[0].label}
+              </span>{" "}
+              at {money(analysis.options[0].result.total)}
+            </p>
+          </div>
 
           <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
             <h2 className="mb-3 font-semibold">Cumulative cost over time</h2>

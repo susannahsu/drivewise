@@ -16,7 +16,14 @@ const PAD = { top: 16, right: 16, bottom: 36, left: 64 };
  * The lowest line at any year is the cheapest option by then; where lines cross
  * is the break-even point — the whole persuasion of the tool in one picture.
  */
-export function BreakEvenChart({ series }: { series: ChartSeries[] }) {
+export function BreakEvenChart({
+  series,
+  xLabel = (i) => `Yr ${i + 1}`,
+}: {
+  series: ChartSeries[];
+  /** Label for the x-axis tick at index i (0-based). */
+  xLabel?: (i: number) => string;
+}) {
   const years = Math.max(...series.map((s) => s.values.length));
   const maxY = Math.max(...series.flatMap((s) => s.values), 1);
 
@@ -68,7 +75,7 @@ export function BreakEvenChart({ series }: { series: ChartSeries[] }) {
             textAnchor="middle"
             className="fill-zinc-400 text-[10px]"
           >
-            Yr {i + 1}
+            {xLabel(i)}
           </text>
         ))}
 

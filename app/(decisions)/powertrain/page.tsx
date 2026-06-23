@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { CostBreakdown } from "@/components/CostBreakdown";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
@@ -108,10 +107,7 @@ export default function PowertrainPage() {
   return (
     <main className="mx-auto flex max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
       <div>
-        <Link href="/" className="text-sm text-zinc-500 hover:underline">
-          ← all decisions
-        </Link>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight">
           Hybrid, gas, or electric?
         </h1>
         <p className="mt-1 text-zinc-600 dark:text-zinc-300">
