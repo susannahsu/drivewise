@@ -236,9 +236,13 @@ docs/
 - Shared: localStorage-persisted profile, CostBreakdown bars, server actions
   that fetch market data and run the engine. Verified end-to-end in-browser.
 
-**Phase 3 — Persuasion layer**
-- Break-even charts, sensitivity sliders, "show your work" breakdowns,
-  "don't buy yet" comparison.
+**Phase 3 — Persuasion layer** ✅ _done_
+- ✅ Break-even charts (dependency-free SVG) on powertrain + acquisition.
+- ✅ Instant what-if sensitivity sliders (gas / electricity / miles) via
+  client-side recompute of the pure engine.
+- ✅ "Show your work" cost-breakdown bars on every view.
+- ✅ "Don't buy yet / keep current car" comparison with verdict.
+- ⏭️ Could extend: sensitivity to model-picker/rideshare; sliders for APR.
 
 **Phase 4 — Depth (pick based on what you actually need)**
 - Live listings (Marketcheck), broader catalog, two-car household optimizer,
