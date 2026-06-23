@@ -22,10 +22,10 @@ your real ownership horizon, break-even analysis, sensitivity to gas-price
 shocks, and a "honestly, don't buy anything yet" answer when that's the right
 call.
 
-> Status: **Phase 3 complete** — the persuasion layer is in: break-even charts
-> (powertrain + acquisition), instant what-if sensitivity sliders, and a "keep
-> my current car" comparison. All four decision views are live with live/fallback
-> prices. 55 tests passing. See [`docs/SPEC.md`](docs/SPEC.md).
+> Status: **Phase 4 in progress.** All four decision views are live with a
+> shared tab nav, what-if sliders, and break-even / crossover charts. Seed MPG
+> is calibrated against EPA fueleconomy.gov, and the model picker shows real car
+> photos (Wikipedia). 55 tests passing. See [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Why this exists
 
