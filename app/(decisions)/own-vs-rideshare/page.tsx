@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { useStoredProfile } from "@/components/ProfileFields";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { CarImage } from "@/components/CarImage";
-import { computeTco, type MarketInputs } from "@/lib/tco";
+import { computeTco } from "@/lib/tco";
+import type { MarketData } from "@/lib/data/market";
+import { LivePrices } from "@/components/LivePrices";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import {
   DEFAULT_FARE_MODEL,
@@ -19,7 +21,7 @@ const DAYS = [1, 2, 3, 4, 5, 6, 7];
 export default function OwnVsRidesharePage() {
   const [profile, setProfile] = useStoredProfile();
   const [vehicleId, setVehicleId] = useState(SEED_VEHICLES[0].id);
-  const [market, setMarket] = useState<MarketInputs | null>(null);
+  const [market, setMarket] = useState<MarketData | null>(null);
   const [pending, setPending] = useState(false);
 
   const [oneWayMiles, setOneWayMiles] = useState(8);
@@ -197,6 +199,8 @@ export default function OwnVsRidesharePage() {
               <input type="range" min={0.6} max={3} step={0.05} value={perMile} onChange={(e) => setPerMile(Number(e.target.value))} className={slider} />
             </label>
           </section>
+
+          {market && <LivePrices market={market} />}
 
           <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-5">
             <div className="flex items-center gap-4">

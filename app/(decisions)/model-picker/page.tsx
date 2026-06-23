@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { CarImage } from "@/components/CarImage";
 import { computeTco, type MarketInputs } from "@/lib/tco";
+import type { MarketData } from "@/lib/data/market";
+import { LivePrices } from "@/components/LivePrices";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import { RESALE_RATIO_5YR } from "@/lib/tco/defaults";
 import type { DrivingProfile, UsState } from "@/lib/schema";
@@ -21,7 +23,7 @@ const PT_LABEL: Record<string, string> = {
 export default function ModelPickerPage() {
   const [profile, setProfile] = useStoredProfile();
   const [objective, setObjective] = useState<Objective>("lowest_tco");
-  const [market, setMarket] = useState<MarketInputs | null>(null);
+  const [market, setMarket] = useState<MarketData | null>(null);
   const [pending, setPending] = useState(false);
 
   const [gas, setGas] = useState(3.5);
@@ -138,6 +140,8 @@ export default function ModelPickerPage() {
               <input type="range" min={1} max={12} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} className={slider} />
             </label>
           </section>
+
+          {market && <LivePrices market={market} />}
 
           <section className="flex flex-col gap-2">
             {rows.map((row, i) => (

@@ -5,6 +5,7 @@ import {
   fallbackElectricityPerKwh,
   fallbackGasPerGallon,
 } from "./fallbacks";
+import type { Priced } from "./priced";
 
 /**
  * U.S. Energy Information Administration (EIA) Open Data API v2.
@@ -17,9 +18,12 @@ import {
  */
 const EIA_BASE = "https://api.eia.gov/v2";
 
+// EIA v2 returns the requested metric under its own column name (e.g. "price"),
+// not a generic "value" field — so parse rows as loose records and pull the
+// column named by the data[0] param.
 const EiaResponse = z.object({
   response: z.object({
-    data: z.array(z.object({ value: z.coerce.number() })),
+    data: z.array(z.record(z.string(), z.unknown())),
   }),
 });
 
@@ -36,11 +40,15 @@ async function eiaLatestValue(path: string, params: Record<string, string>) {
   const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!res.ok) return null;
   const parsed = EiaResponse.safeParse(await res.json());
-  return parsed.success ? (parsed.data.response.data[0]?.value ?? null) : null;
+  if (!parsed.success) return null;
+  const column = params["data[0]"]; // the metric's column name, e.g. "price"
+  const raw = parsed.data.response.data[0]?.[column];
+  const num = raw == null ? NaN : Number(raw);
+  return Number.isFinite(num) ? num : null;
 }
 
 /** Residential electricity price for a state, in $/kWh. */
-export async function getElectricityPerKwh(state: UsState): Promise<number> {
+export async function getElectricityPerKwh(state: UsState): Promise<Priced> {
   return cached(`elec:${state}`, TTL.ENERGY, async () => {
     try {
       // EIA reports cents/kWh for residential sector ("RES") by state.
@@ -50,20 +58,20 @@ export async function getElectricityPerKwh(state: UsState): Promise<number> {
         "data[0]": "price",
         frequency: "monthly",
       });
-      if (cents != null && cents > 0) return cents / 100;
+      if (cents != null && cents > 0) return { value: cents / 100, live: true };
     } catch {
       /* fall through to fallback */
     }
-    return fallbackElectricityPerKwh(state);
+    return { value: fallbackElectricityPerKwh(state), live: false };
   });
 }
 
 /** Regular gasoline price for a state, in $/gallon. */
-export async function getGasPerGallon(state: UsState): Promise<number> {
+export async function getGasPerGallon(state: UsState): Promise<Priced> {
   return cached(`gas:${state}`, TTL.ENERGY, async () => {
     // EIA gas coverage is limited; the fallback table fills the gaps. A future
     // pass can map uncovered states to their PADD region. For now we use the
     // fallback unless we later add a verified per-state series mapping.
-    return fallbackGasPerGallon(state);
+    return { value: fallbackGasPerGallon(state), live: false };
   });
 }

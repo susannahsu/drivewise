@@ -5,6 +5,8 @@ import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { CostBreakdown } from "@/components/CostBreakdown";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { computeTco, type MarketInputs } from "@/lib/tco";
+import type { MarketData } from "@/lib/data/market";
+import { LivePrices } from "@/components/LivePrices";
 import { REPRESENTATIVE_VEHICLES } from "@/lib/models/representative";
 import { keepCurrentCar } from "@/lib/tco/keep";
 import { estimateAnnualInsurance } from "@/lib/tco/insurance";
@@ -22,7 +24,7 @@ const POWERTRAIN_LABEL: Record<string, string> = {
 
 export default function PowertrainPage() {
   const [profile, setProfile] = useStoredProfile();
-  const [market, setMarket] = useState<MarketInputs | null>(null);
+  const [market, setMarket] = useState<MarketData | null>(null);
   const [pending, setPending] = useState(false);
 
   // Sensitivity "what-if" overrides, seeded from the live values on first fetch.
@@ -189,8 +191,8 @@ export default function PowertrainPage() {
                 />
               </label>
             </div>
+            {market && <LivePrices market={market} />}
             <p className="text-xs text-zinc-400">
-              Loan APR {(analysis.loanApr * 100).toFixed(1)}% (live).{" "}
               {profile.homeCharging
                 ? "EV charged at home."
                 : "No home charging: EV uses public-rate electricity (~3x)."}
