@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { CostBreakdown } from "@/components/CostBreakdown";
+import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import { money } from "@/lib/format";
 import {
@@ -75,6 +76,18 @@ export default function AcquisitionPage() {
             </span>{" "}
             at {money(analysis.options[0].result.total)}
           </p>
+
+          <div className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
+            <h2 className="mb-3 font-semibold">Cumulative cost over time</h2>
+            <BreakEvenChart
+              series={analysis.options.map((opt, i) => ({
+                label: opt.label,
+                color: SERIES_COLORS[i % SERIES_COLORS.length],
+                values: opt.result.cumulativeByYear,
+              }))}
+            />
+          </div>
+
           {analysis.options.map((opt, i) => (
             <div
               key={opt.key}
