@@ -14,8 +14,8 @@ car), then polished into a portfolio project.
 > recommendation shows its work — a full cost breakdown, a break-even chart, and
 > the assumptions used.
 
-<!-- Add screenshots to docs/screenshots/ and they'll render here -->
-<!-- ![Guided recommendation](docs/screenshots/guide-dashboard.png) -->
+![DriveWise landing page](public/homepage.png)
+*Start the guided flow for a single synthesized recommendation, or jump directly to any of the four decision tools.*
 
 ## What it does
 
@@ -35,6 +35,37 @@ On top of that: total cost of ownership over your real horizon, **what-if
 sliders** (gas price, mileage, years) that re-rank everything instantly,
 **break-even charts**, a "keep your current car" comparison, and a **dealer
 listings** lookup that pulls live local inventory for a chosen model.
+
+### Guided flow
+
+![Guided flow — step 1](public/questionnaire_example.png)
+*The 7-step wizard opens with state and charging situation — this one question calibrates local electricity and gas prices, insurance rates, and sales tax for every calculation that follows.*
+
+### Powertrain — hybrid, gas, or electric?
+
+![Powertrain — break-even chart](public/pick_type_1.png)
+*Live CA prices ($5.39/gal gas, $0.33/kWh electricity, 7.4% loan). At 4,000 mi/yr with no home charging, hybrid wins at $33,331 over 5 years. The chart shows cumulative cost year-by-year; drag the sliders to test how sensitive the answer is to price changes.*
+
+![Powertrain — TCO breakdown by line item](public/pick_type_2.png)
+*Full additive cost breakdown for all three powertrains. The bars make visible what actually drives the difference: without home charging, EV fuel cost triples (public L2/DCFC vs residential rate), pushing electric from competitive to last place.*
+
+### Own a car, or just Uber?
+
+![Own vs lease vs rideshare crossover](public/own_or_uber.png)
+*At 5 days/week commuting 8 miles each way in CA, owning beats rideshare by $1,018/mo. The crossover chart shows the break-even commuting frequency — rideshare wins only at very low usage. Lease and own track closely; rideshare diverges steeply with days driven.*
+
+### Which car should I buy?
+
+![Model picker ranked by reliability](public/models.png)
+*The 20-car best-value shortlist ranked for "Most reliable" in CA. Each card shows powertrain, real EPA MPG, iSeeCars 5-yr resale ratio, and NHTSA complaint-weighted reliability. Car photos fetched from Wikipedia. Drag the gas/mileage/years sliders to watch rankings shift live.*
+
+### Lease, buy new, or buy used?
+
+![Acquisition — cumulative cost chart](public/lease_buy_new_used_1.png)
+*Toyota Corolla Hybrid over 5 years in CA: buy used (~3yr old) wins at $27,888 total — $1,687 less than finance new, and $13,431 less than leasing. The chart makes clear that lease front-loads cost and never builds equity.*
+
+![Acquisition — line-item breakdown and dealer listings](public/lease_buy_new_used_2.png)
+*Per-strategy cost breakdown by line item (depreciation, insurance, financing, fuel, taxes) plus live dealer listings pulled from Auto.dev for the chosen model and zip code.*
 
 ## The core idea: one engine, many questions
 
