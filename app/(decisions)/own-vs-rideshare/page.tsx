@@ -45,16 +45,17 @@ export default function OwnVsRidesharePage() {
     const fareModel = { ...DEFAULT_FARE_MODEL, perMile };
     const years = Math.max(1, Math.round(profile.ownershipYears));
 
-    const ownAt = (d: number) => {
-      const p: DrivingProfile = {
-        state: profile.state as UsState,
-        homeCharging: profile.homeCharging,
-        annualMiles: Math.max(1000, oneWayMiles * 2 * d * 52),
-        ownershipYears: years,
-        routes: [],
-      };
-      return computeTco(vehicle, p, market).perMonth;
-    };
+    const profileAt = (d: number): DrivingProfile => ({
+      state: profile.state as UsState,
+      homeCharging: profile.homeCharging,
+      annualMiles: Math.max(1000, oneWayMiles * 2 * d * 52),
+      ownershipYears: years,
+      routes: [],
+    });
+    const ownAt = (d: number) =>
+      computeTco(vehicle, profileAt(d), market, { mode: "finance" }).perMonth;
+    const leaseAt = (d: number) =>
+      computeTco(vehicle, profileAt(d), market, { mode: "lease" }).perMonth;
     const rideAt = (d: number) =>
       monthlyRideshareCost(
         { oneWayMiles, daysPerWeek: d, departTime, returnTime },
@@ -62,29 +63,35 @@ export default function OwnVsRidesharePage() {
       );
 
     const ownValues = DAYS.map(ownAt);
+    const leaseValues = DAYS.map(leaseAt);
     const rideValues = DAYS.map(rideAt);
 
-    // First day-count where rideshare becomes more expensive than owning.
+    // First day-count where rideshare costs more than the cheaper of own/lease.
     let breakEven: number | null = null;
     for (const d of DAYS) {
-      if (rideAt(d) >= ownAt(d)) {
+      if (rideAt(d) >= Math.min(ownAt(d), leaseAt(d))) {
         breakEven = d;
         break;
       }
     }
 
-    const own = ownAt(daysPerWeek);
-    const ride = rideAt(daysPerWeek);
+    const label = `${vehicle.make} ${vehicle.model}`;
+    const options = [
+      { key: "own", short: "Own", label: `Own the ${label}`, value: ownAt(daysPerWeek) },
+      { key: "lease", short: "Lease", label: `Lease the ${label}`, value: leaseAt(daysPerWeek) },
+      { key: "ride", short: "Rideshare", label: "Skip the car — rideshare", value: rideAt(daysPerWeek) },
+    ].sort((a, b) => a.value - b.value);
 
     return {
-      vehicleLabel: `${vehicle.make} ${vehicle.model}`,
+      vehicleLabel: label,
       make: vehicle.make,
       model: vehicle.model,
-      own,
-      ride,
+      options,
+      cheapest: options[0],
       breakEven,
       series: [
         { label: "Own", color: SERIES_COLORS[0], values: ownValues },
+        { label: "Lease", color: SERIES_COLORS[2], values: leaseValues },
         { label: "Rideshare", color: SERIES_COLORS[1], values: rideValues },
       ],
     };
@@ -112,8 +119,9 @@ export default function OwnVsRidesharePage() {
           Own a car, or just Uber?
         </h1>
         <p className="mt-1 text-zinc-600 dark:text-zinc-300">
-          Owning is mostly fixed; rideshare scales with how often you go. The
-          chart shows where they cross as commuting days rise.
+          Buying, leasing, or skipping the car for rideshare. Owning and leasing
+          are mostly fixed; rideshare scales with how often you go — the chart
+          shows where they cross as commuting days rise.
         </p>
       </div>
 
@@ -211,19 +219,23 @@ export default function OwnVsRidesharePage() {
               />
               <div>
                 <p className="text-sm text-zinc-500">
-                  At {daysPerWeek} days/week, cheaper option:
+                  At {daysPerWeek} days/week, cheapest option:
                 </p>
-                <p className="text-xl font-semibold">
-                  {analysis.ride < analysis.own
-                    ? "Skip the car — rideshare"
-                    : `Own the ${analysis.vehicleLabel}`}
+                <p className="text-xl font-semibold">{analysis.cheapest.label}</p>
+                <p className="mt-1 flex flex-wrap gap-x-4 text-sm text-zinc-500">
+                  {analysis.options.map((o) => (
+                    <span key={o.key}>
+                      {o.short}{" "}
+                      <span className="tabular-nums text-zinc-700 dark:text-zinc-300">
+                        {money(o.value)}/mo
+                      </span>
+                    </span>
+                  ))}
                 </p>
-                <p className="mt-1 text-sm text-zinc-500">
-                  Own {money(analysis.own)}/mo vs rideshare{" "}
-                  {money(analysis.ride)}/mo ·{" "}
+                <p className="mt-1 text-xs text-zinc-500">
                   {analysis.breakEven
-                    ? `owning wins from ~${analysis.breakEven} day${analysis.breakEven > 1 ? "s" : ""}/week up`
-                    : "rideshare stays cheaper even at 7 days/week"}
+                    ? `Owning or leasing wins from ~${analysis.breakEven} day${analysis.breakEven > 1 ? "s" : ""}/week up.`
+                    : "Rideshare stays cheaper even at 7 days/week."}
                 </p>
               </div>
             </div>
