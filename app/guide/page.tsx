@@ -6,6 +6,7 @@ import { CarImage } from "@/components/CarImage";
 import { DealerFinder } from "@/components/DealerFinder";
 import { saveProfile } from "@/components/ProfileFields";
 import { saveGuideHandoff } from "@/components/guideHandoff";
+import { researchUrl } from "@/lib/car-links";
 import { US_STATES, type UsState } from "@/lib/schema";
 import { money } from "@/lib/format";
 import {
@@ -292,6 +293,14 @@ function Dashboard({
               {money(rec.acquisition[0].total)} all-in over {rec.modelResult.horizonYears} years ·{" "}
               {money(rec.acquisition[0].perMonth)}/mo
             </p>
+            <a
+              href={researchUrl(rec.model)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+            >
+              Look up the {rec.model.make} {rec.model.model} ↗
+            </a>
           </div>
         </div>
         <ul className="flex flex-col gap-1.5 text-sm text-zinc-600 dark:text-zinc-300">

@@ -5,6 +5,7 @@ import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
 import { useAutoRun, useHydrated } from "@/components/useAutoRun";
 import { loadGuideHandoff } from "@/components/guideHandoff";
 import { ResultsSkeleton } from "@/components/ResultsSkeleton";
+import { researchUrl } from "@/lib/car-links";
 import { CarImage } from "@/components/CarImage";
 import { computeTco, type MarketInputs } from "@/lib/tco";
 import type { MarketData } from "@/lib/data/market";
@@ -179,9 +180,18 @@ export default function ModelPickerPage() {
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="truncate font-medium">
+                    <a
+                      href={researchUrl(row.vehicle)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group/link truncate font-medium hover:text-emerald-700 hover:underline dark:hover:text-emerald-400"
+                      title={`Look up the ${row.vehicle.make} ${row.vehicle.model}`}
+                    >
                       {row.vehicle.make} {row.vehicle.model}
-                    </p>
+                      <span className="ml-1 text-xs text-zinc-400 group-hover/link:text-emerald-600">
+                        ↗
+                      </span>
+                    </a>
                     <p className="shrink-0 font-semibold tabular-nums">
                       {money(row.result.total)}
                     </p>
