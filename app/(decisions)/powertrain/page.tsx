@@ -2,13 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
+import { useAutoRun } from "@/components/useAutoRun";
+import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { CostBreakdown } from "@/components/CostBreakdown";
+import { Assumptions } from "@/components/Assumptions";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { computeTco, type MarketInputs } from "@/lib/tco";
 import type { MarketData } from "@/lib/data/market";
 import { LivePrices } from "@/components/LivePrices";
 import { REPRESENTATIVE_VEHICLES } from "@/lib/models/representative";
 import { keepCurrentCar } from "@/lib/tco/keep";
+import { evIncentive } from "@/lib/tco/incentives";
 import { estimateAnnualInsurance } from "@/lib/tco/insurance";
 import { ANNUAL_REGISTRATION } from "@/lib/tco/defaults";
 import type { DrivingProfile, UsState } from "@/lib/schema";
@@ -31,6 +35,7 @@ export default function PowertrainPage() {
   const [gas, setGas] = useState(3.5);
   const [elec, setElec] = useState(0.17);
   const [miles, setMiles] = useState(12000);
+  const [applyIncentives, setApplyIncentives] = useState(true);
 
   // "Don't buy yet" comparison.
   const [keepOn, setKeepOn] = useState(false);
@@ -50,6 +55,8 @@ export default function PowertrainPage() {
     }
   }
 
+  useAutoRun(run);
+
   const analysis = useMemo(() => {
     if (!market) return null;
     const years = Math.max(1, Math.round(profile.ownershipYears));
@@ -66,10 +73,18 @@ export default function PowertrainPage() {
       routes: [],
     };
 
-    const rows = REPRESENTATIVE_VEHICLES.map((vehicle) => ({
-      vehicle,
-      result: computeTco(vehicle, effProfile, effMarket),
-    })).sort((a, b) => a.result.total - b.result.total);
+    const rows = REPRESENTATIVE_VEHICLES.map((vehicle) => {
+      const incentive = applyIncentives
+        ? evIncentive(vehicle, profile.state as UsState).total
+        : 0;
+      return {
+        vehicle,
+        incentive,
+        result: computeTco(vehicle, effProfile, effMarket, undefined, {
+          incentive,
+        }),
+      };
+    }).sort((a, b) => a.result.total - b.result.total);
 
     const keep = keepOn
       ? keepCurrentCar(
@@ -100,7 +115,7 @@ export default function PowertrainPage() {
     }
 
     return { rows, keep, series, years, loanApr: market.loanApr };
-  }, [market, gas, elec, miles, profile, keepOn, keepMpg, keepMaint]);
+  }, [market, gas, elec, miles, profile, keepOn, keepMpg, keepMaint, applyIncentives]);
 
   const winner = analysis?.rows[0];
   const slider =
@@ -125,9 +140,11 @@ export default function PowertrainPage() {
           disabled={pending}
           className="self-start rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {pending ? "Fetching prices…" : market ? "Refresh prices" : "Compare powertrains"}
+          {pending ? "Fetching prices…" : "Refresh prices"}
         </button>
       </section>
+
+      {!analysis && pending && <ResultsSkeleton />}
 
       {analysis && winner && (
         <>
@@ -192,11 +209,23 @@ export default function PowertrainPage() {
               </label>
             </div>
             {market && <LivePrices market={market} />}
-            <p className="text-xs text-zinc-400">
-              {profile.homeCharging
-                ? "EV charged at home."
-                : "No home charging: EV uses public-rate electricity (~3x)."}
-            </p>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 text-xs text-zinc-500">
+                <input
+                  type="checkbox"
+                  checked={applyIncentives}
+                  onChange={(e) => setApplyIncentives(e.target.checked)}
+                />
+                Apply EV incentives ({money(evIncentive(REPRESENTATIVE_VEHICLES.find((v) => v.powertrain === "ev")!, profile.state as UsState).total)} off the EV here)
+              </label>
+              <p className="text-xs text-zinc-400">
+                {profile.homeCharging
+                  ? "EV charged at home."
+                  : "No home charging: EV uses public-rate electricity (~3x)."}{" "}
+                Incentives = federal clean-vehicle credit + your state rebate, if
+                eligible.
+              </p>
+            </div>
           </section>
 
           {/* Break-even chart */}
@@ -280,6 +309,13 @@ export default function PowertrainPage() {
                   </span>
                 </div>
                 <CostBreakdown result={row.result} />
+                <Assumptions
+                  vehicle={row.vehicle}
+                  state={profile.state as UsState}
+                  loanApr={analysis.loanApr}
+                  homeCharging={profile.homeCharging}
+                  incentiveApplied={applyIncentives}
+                />
               </div>
             ))}
           </section>

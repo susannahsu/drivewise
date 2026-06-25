@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useStoredProfile } from "@/components/ProfileFields";
+import { useAutoRun } from "@/components/useAutoRun";
+import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { CarImage } from "@/components/CarImage";
 import { computeTco } from "@/lib/tco";
@@ -38,6 +40,8 @@ export default function OwnVsRidesharePage() {
       setPending(false);
     }
   }
+
+  useAutoRun(run);
 
   const analysis = useMemo(() => {
     if (!market) return null;
@@ -181,9 +185,11 @@ export default function OwnVsRidesharePage() {
           disabled={pending}
           className="self-start rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {pending ? "Fetching prices…" : market ? "Refresh prices" : "Compare"}
+          {pending ? "Fetching prices…" : "Refresh prices"}
         </button>
       </section>
+
+      {!analysis && pending && <ResultsSkeleton />}
 
       {analysis && (
         <>

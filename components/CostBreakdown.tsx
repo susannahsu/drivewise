@@ -11,8 +11,11 @@ export function CostBreakdown({ result }: { result: TcoResult }) {
   return (
     <div className="flex flex-col gap-2">
       {entries.map(([key, value]) => (
-        <div key={key} className="grid grid-cols-[10rem_1fr_5rem] items-center gap-3 text-sm">
-          <span className="text-zinc-600 dark:text-zinc-400">
+        <div
+          key={key}
+          className="grid grid-cols-[minmax(5.5rem,9rem)_1fr_auto] items-center gap-2 text-xs sm:gap-3 sm:text-sm"
+        >
+          <span className="truncate text-zinc-600 dark:text-zinc-400">
             {BREAKDOWN_LABELS[key] ?? key}
           </span>
           <span className="h-3 rounded bg-zinc-100 dark:bg-zinc-800">
@@ -21,7 +24,9 @@ export function CostBreakdown({ result }: { result: TcoResult }) {
               style={{ width: `${(value / max) * 100}%` }}
             />
           </span>
-          <span className="text-right tabular-nums">{money(value)}</span>
+          <span className="min-w-[3.5rem] text-right tabular-nums">
+            {money(value)}
+          </span>
         </div>
       ))}
     </div>

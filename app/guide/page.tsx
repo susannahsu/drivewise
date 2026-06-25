@@ -116,7 +116,7 @@ export default function GuidePage() {
             disabled={pending}
             className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
-            {pending ? "Crunching the numbers…" : "See my recommendation"}
+            {pending ? "Fetching live prices…" : "See my recommendation"}
           </button>
         )}
       </div>
@@ -294,9 +294,14 @@ function Dashboard({
         </ul>
         <p className="text-xs text-zinc-500">
           Optimized for <strong>{OBJECTIVES[objective].toLowerCase()}</strong>.
-          Hit “Adjust answers” and change your priority (or body style / budget)
-          to see different picks — e.g. holds-value favors the Civic Hybrid,
-          reliability the Corolla Cross.
+          Hit “Adjust answers” to change your priority — e.g.{" "}
+          {rec.objectiveHints.slice(0, 2).map((h, i) => (
+            <span key={h.objective}>
+              {i > 0 ? ", " : ""}
+              {h.label} favors the <strong>{h.pick}</strong>
+            </span>
+          ))}
+          .
         </p>
       </section>
 

@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
+import { useAutoRun } from "@/components/useAutoRun";
+import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { CostBreakdown } from "@/components/CostBreakdown";
+import { Assumptions } from "@/components/Assumptions";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { CarImage } from "@/components/CarImage";
 import { DealerFinder } from "@/components/DealerFinder";
+import { DealRater } from "@/components/DealRater";
 import { SEED_VEHICLES } from "@/lib/models/seed";
+import type { UsState } from "@/lib/schema";
 import { money } from "@/lib/format";
 import {
   compareAcquisition,
@@ -28,6 +33,8 @@ export default function AcquisitionPage() {
       setPending(false);
     }
   }
+
+  useAutoRun(run);
 
   return (
     <main className="mx-auto flex max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
@@ -62,9 +69,11 @@ export default function AcquisitionPage() {
           disabled={pending}
           className="self-start rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {pending ? "Comparing…" : "Compare options"}
+          {pending ? "Comparing…" : "Refresh"}
         </button>
       </section>
+
+      {!analysis && pending && <ResultsSkeleton />}
 
       {analysis && (
         <section className="flex flex-col gap-5">
@@ -116,8 +125,18 @@ export default function AcquisitionPage() {
               </div>
               <p className="mb-3 text-xs text-zinc-500">{opt.note}</p>
               <CostBreakdown result={opt.result} />
+              {opt.key !== "lease" && (
+                <Assumptions
+                  vehicle={selected}
+                  state={profile.state as UsState}
+                  loanApr={analysis.loanApr}
+                  homeCharging={profile.homeCharging}
+                />
+              )}
             </div>
           ))}
+
+          <DealRater msrp={selected.msrp} marketApr={analysis.loanApr} />
 
           <DealerFinder
             make={selected.make}

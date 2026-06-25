@@ -9,6 +9,7 @@ import { resaleValueAtAge } from "@/lib/tco/depreciation";
 import { REPRESENTATIVE_VEHICLES } from "@/lib/models/representative";
 import { SEED_VEHICLES } from "@/lib/models/seed";
 import { RESALE_RATIO_5YR } from "@/lib/tco/defaults";
+import { evIncentive } from "@/lib/tco/incentives";
 import {
   DEFAULT_FARE_MODEL,
   monthlyRideshareCost,
@@ -77,6 +78,9 @@ export interface Recommendation {
   };
   headline: string;
   rationale: string[];
+  /** Top pick under each *other* objective, so "try a different priority"
+   *  copy stays true to the catalog instead of being hardcoded. */
+  objectiveHints: { objective: RecObjective; label: string; pick: string }[];
 }
 
 const PT_LABEL: Record<string, string> = {
@@ -97,10 +101,13 @@ export function recommend(
 ): Recommendation {
   const profile = profileFor(a, a.annualMiles);
 
-  // 1) Powertrain — representative gas / hybrid / EV.
+  // 1) Powertrain — representative gas / hybrid / EV. EV gets its purchase
+  // incentive netted in so it's compared on a fair, real-world basis.
   const ptRows = REPRESENTATIVE_VEHICLES.map((v) => ({
     powertrain: v.powertrain,
-    total: computeTco(v, profile, market).total,
+    total: computeTco(v, profile, market, undefined, {
+      incentive: evIncentive(v, a.state).total,
+    }).total,
   })).sort((x, y) => x.total - y.total);
   const powertrainWinner = ptRows[0].powertrain as "gas" | "hybrid" | "ev";
 
@@ -115,25 +122,45 @@ export function recommend(
     result: computeTco(vehicle, profile, market),
     resaleRatio: vehicle.resaleRatio5yr ?? RESALE_RATIO_5YR[vehicle.bodyStyle],
   });
-  const byObjective = (
-    x: ReturnType<typeof score>,
-    y: ReturnType<typeof score>,
-  ) => {
-    switch (a.objective) {
-      case "lowest_tco":
-        return x.result.total - y.result.total;
-      case "best_efficiency":
-        return (y.vehicle.combinedMpg ?? 0) - (x.vehicle.combinedMpg ?? 0);
-      case "slowest_depreciation":
-        return y.resaleRatio - x.resaleRatio;
-      case "most_reliable":
-        return (y.vehicle.reliability ?? 0) - (x.vehicle.reliability ?? 0);
-    }
-  };
+  const comparatorFor =
+    (objective: RecObjective) =>
+    (x: ReturnType<typeof score>, y: ReturnType<typeof score>) => {
+      switch (objective) {
+        case "lowest_tco":
+          return x.result.total - y.result.total;
+        case "best_efficiency":
+          return (y.vehicle.combinedMpg ?? 0) - (x.vehicle.combinedMpg ?? 0);
+        case "slowest_depreciation":
+          return y.resaleRatio - x.resaleRatio;
+        case "most_reliable":
+          return (y.vehicle.reliability ?? 0) - (x.vehicle.reliability ?? 0);
+      }
+    };
+  const byObjective = comparatorFor(a.objective);
 
   // Full eligible ranking — used for the cross-powertrain alternatives so the
   // user still sees (e.g.) the cheapest gas option even when we pick a hybrid.
-  const rankedAll = pool.map(score).sort(byObjective);
+  const scored = pool.map(score);
+  const rankedAll = [...scored].sort(byObjective);
+
+  // Top pick under each OTHER objective — drives the "try a different priority"
+  // hint so it always names real catalog winners, never a stale hardcoded pair.
+  const ALL_OBJECTIVES: RecObjective[] = [
+    "lowest_tco",
+    "best_efficiency",
+    "slowest_depreciation",
+    "most_reliable",
+  ];
+  const objectiveHints = ALL_OBJECTIVES.filter((o) => o !== a.objective).map(
+    (o) => {
+      const winner = [...scored].sort(comparatorFor(o))[0];
+      return {
+        objective: o,
+        label: objectiveLabel(o),
+        pick: `${winner.vehicle.make} ${winner.vehicle.model}`,
+      };
+    },
+  );
 
   // Honor the winning powertrain downstream: pick the best model OF that
   // powertrain when the eligible pool has any; otherwise fall back to the
@@ -247,6 +274,7 @@ export function recommend(
     rideshare: { ownMonthly, rideMonthly, rideshareCheaper },
     headline,
     rationale,
+    objectiveHints,
   };
 }
 

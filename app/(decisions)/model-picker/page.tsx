@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
+import { useAutoRun } from "@/components/useAutoRun";
+import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { CarImage } from "@/components/CarImage";
 import { computeTco, type MarketInputs } from "@/lib/tco";
 import type { MarketData } from "@/lib/data/market";
@@ -42,6 +44,8 @@ export default function ModelPickerPage() {
       setPending(false);
     }
   }
+
+  useAutoRun(run);
 
   const rows = useMemo(() => {
     if (!market) return null;
@@ -114,9 +118,11 @@ export default function ModelPickerPage() {
           disabled={pending}
           className="self-start rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {pending ? "Fetching prices…" : market ? "Refresh prices" : "Rank the cars"}
+          {pending ? "Fetching prices…" : "Refresh prices"}
         </button>
       </section>
+
+      {!rows && pending && <ResultsSkeleton />}
 
       {rows && (
         <>

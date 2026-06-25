@@ -30,6 +30,7 @@ export interface AcquisitionOption {
 export interface AcquisitionAnalysis {
   vehicleLabel: string;
   options: AcquisitionOption[]; // cheapest first
+  loanApr: number;
 }
 
 export async function compareAcquisition(
@@ -75,5 +76,9 @@ export async function compareAcquisition(
   ];
   options.sort((a, b) => a.result.total - b.result.total);
 
-  return { vehicleLabel: `${vehicle.make} ${vehicle.model}`, options };
+  return {
+    vehicleLabel: `${vehicle.make} ${vehicle.model}`,
+    options,
+    loanApr: market.loanApr,
+  };
 }

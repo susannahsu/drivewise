@@ -45,6 +45,12 @@ export interface AcquisitionTerms {
 export interface TcoOptions {
   /** Real insurance quote, if the user has one — overrides the estimate. */
   insuranceAnnualOverride?: number;
+  /**
+   * EV purchase incentive (federal + state) applied as an instant rebate: it
+   * lowers the net price you finance and the depreciation you absorb, but not
+   * resale value. See lib/tco/incentives.ts. Ignored for leases.
+   */
+  incentive?: number;
 }
 
 const DEFAULT_TERMS: AcquisitionTerms = { mode: "finance" };
@@ -106,10 +112,14 @@ export function computeTco(
     resaleAtEnd = 0;
     // Leases are typically taxed on payments, not a big upfront sum: fold none.
   } else {
+    // An EV incentive acts as an instant rebate: it lowers the net price you
+    // finance and absorb as depreciation, but not the car's resale value.
+    const incentive = Math.max(0, options.incentive ?? 0);
+    const netPrice = Math.max(0, price - incentive);
     const downPayment =
       terms.downPayment ??
-      (terms.mode === "cash" ? price : price * DEFAULT_DOWN_PAYMENT_FRACTION);
-    const principal = Math.max(0, price - downPayment);
+      (terms.mode === "cash" ? netPrice : price * DEFAULT_DOWN_PAYMENT_FRACTION);
+    const principal = Math.max(0, netPrice - downPayment);
     const loanTerm = terms.loanTermMonths ?? DEFAULT_LOAN_TERM_MONTHS;
     const interest =
       terms.mode === "cash"
@@ -117,19 +127,20 @@ export function computeTco(
         : totalLoanInterest(principal, market.loanApr, loanTerm);
 
     // Depreciation accrues along the resale curve; year 1 also absorbs any
-    // gap between the price paid and the car's market value at purchase age.
+    // gap between the net price paid (after incentive) and the car's market
+    // value at purchase age.
     const valueAtPurchase = resaleValueAtAge(vehicle, startAge);
     for (let y = 0; y < years; y++) {
       const vStart = resaleValueAtAge(vehicle, startAge + y);
       const vEnd = resaleValueAtAge(vehicle, startAge + y + 1);
       let dep = vStart - vEnd;
-      if (y === 0) dep += price - valueAtPurchase;
+      if (y === 0) dep += netPrice - valueAtPurchase;
       depByYear.push(dep);
       interestByYear.push(interest / years); // spread evenly across the hold
     }
     resaleAtEnd = resaleValueAtAge(vehicle, startAge + years);
 
-    const capitalTiedUp = terms.mode === "cash" ? price : downPayment;
+    const capitalTiedUp = terms.mode === "cash" ? netPrice : downPayment;
     oppCostTotal = opportunityCost(capitalTiedUp, OPPORTUNITY_COST_RATE, years);
     upfrontFees = salesTax(price, profile.state);
   }
