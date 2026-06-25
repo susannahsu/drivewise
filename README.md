@@ -26,7 +26,7 @@ standalone tool you can open directly:
 
 | Decision | Question | What drives it |
 |----------|----------|----------------|
-| **Powertrain** | Hybrid, gas, or electric? | Live gas/electricity for your state, your mileage, and whether you can charge at home |
+| **Powertrain** | Hybrid, gas, or electric? | Live gas/electricity for your state, your mileage, whether you can charge at home, and **EV incentives** (federal + state) |
 | **Own vs Uber** | Buy, lease, or just rideshare? | Your real commute with rush-hour surge vs the fixed cost of owning/leasing |
 | **Which model** | Best car for *you*? | A 20-car best-value shortlist ranked by your priority — lowest cost, efficiency, resale, or reliability |
 | **How to pay** | Lease, buy new, or buy used? | Depreciation curves, live loan rates, and how long you'll keep it |
@@ -35,6 +35,19 @@ On top of that: total cost of ownership over your real horizon, **what-if
 sliders** (gas price, mileage, years) that re-rank everything instantly,
 **break-even charts**, a "keep your current car" comparison, and a **dealer
 listings** lookup that pulls live local inventory for a chosen model.
+
+Two features make it useful at the moment of decision, not just for research:
+
+- **Rate my deal** — enter the actual dealer offer (price, APR, term, down) and
+  get a **good / fair / walk-away verdict** against MSRP and today's going loan
+  rate, with the monthly payment, total interest, and a fair-price target. It
+  separates the two levers a dealer controls — the negotiated price and the
+  financing markup — and grades each, so you know whether to push on the price,
+  refinance the loan, or sign.
+- **Show the assumptions** — every result card opens to reveal the estimated
+  inputs behind the number (insurance, resale ratio, maintenance/mi, loan APR,
+  tax, opportunity cost), so the figure is auditable at the point of the claim
+  instead of taken on faith.
 
 ### Guided flow
 
@@ -67,6 +80,16 @@ listings** lookup that pulls live local inventory for a chosen model.
 ![Acquisition — line-item breakdown and dealer listings](public/lease_buy_new_used_2.png)
 *Per-strategy cost breakdown by line item (depreciation, insurance, financing, fuel, taxes) plus live dealer listings pulled from Auto.dev for the chosen model and zip code.*
 
+### Is this a good deal?
+
+<!-- Add a screenshot to public/rate_my_deal.png to render it here -->
+<!-- ![Rate my deal verdict](public/rate_my_deal.png) -->
+*Enter a real dealer offer and get a good / fair / **walk-away** verdict. The
+rater grades the negotiated price (vs MSRP) and the financing APR (vs the live
+going rate) independently — so a 9.5% APR that's 2.1 points over market gets
+flagged as a financing markup costing you $5,514 in interest, with the advice to
+get outside financing, even when the price itself is fair.*
+
 ## The core idea: one engine, many questions
 
 Every question above is secretly the same question — *"what's the total cost of
@@ -82,9 +105,12 @@ A few decisions a reviewer might find interesting:
 
 - **Pure, testable core.** The TCO engine ([`lib/tco/`](lib/tco)) does no I/O —
   live prices are fetched separately and injected in. That keeps the math
-  fully unit-testable (64 tests) and the data sources swappable. The cumulative
+  fully unit-testable (76 tests) and the data sources swappable. The cumulative
   cost series is the single source of truth, so the headline number and the
-  break-even chart can never disagree.
+  break-even chart can never disagree. The deal-rater verdict
+  ([`lib/deal.ts`](lib/deal.ts)) and EV-incentive logic
+  ([`lib/tco/incentives.ts`](lib/tco/incentives.ts)) are pure functions too, so
+  their grading is locked down by tests rather than eyeballed.
 - **Instant sensitivity, server-fetched prices.** Because the engine is pure, it
   runs in the browser: each page fetches live prices once via a server action,
   then recomputes results client-side as the sliders move — no round-trips per
@@ -151,12 +177,13 @@ Other scripts: `npm run build`, `npm run lint`, `npm test`.
 ## Tests
 
 ```bash
-npm test           # 64 unit tests (vitest)
+npm test           # 76 unit tests (vitest)
 ```
 
 Coverage focuses on the parts that matter: every TCO line item, the rideshare
-fare model, the "keep current car" math, and the end-to-end recommendation
-engine (powertrain coupling, budget/body filtering, rideshare crossover).
+fare model, the "keep current car" math, EV-incentive eligibility, the
+deal-rater grading, and the end-to-end recommendation engine (powertrain
+coupling, budget/body filtering, rideshare crossover).
 
 ## Project structure
 
@@ -167,17 +194,21 @@ app/
     powertrain/  own-vs-rideshare/  model-picker/  acquisition/
 lib/
   tco/                    # pure TCO engine — one module per cost line
+    incentives.ts         # federal + state EV credits, netted off price
   data/                   # live-price fetchers (EIA, FRED, Auto.dev) + fallbacks
   models/                 # the calibrated 20-car seed catalog
   recommend.ts            # composes all four modules into one recommendation
-components/               # charts, car images, shared inputs
+  deal.ts                 # pure "rate my deal" grading (price + financing)
+components/               # charts, car images, deal rater, assumptions, inputs
 docs/                     # spec, data-source research, car shortlist
 scripts/                  # one-off data calibration (EPA MPG)
 ```
 
 ## Notes
 
-This is a personal project and a decision aid, not financial advice. Figures are
-best-effort estimates; insurance, depreciation, and rideshare fares are modeled
-and meant to be overridden with your own quotes. Prices are cached and reflect
-the most recent data each source publishes.
+This is a personal project and a decision aid, not financial or tax advice.
+Figures are best-effort estimates; insurance, depreciation, and rideshare fares
+are modeled and meant to be overridden with your own quotes. EV incentives are
+conservative 2026 ballparks with income/MSRP caps and changing eligibility —
+confirm before relying on them. Prices are cached and reflect the most recent
+data each source publishes.
