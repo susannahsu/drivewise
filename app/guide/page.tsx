@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CarImage } from "@/components/CarImage";
 import { DealerFinder } from "@/components/DealerFinder";
 import { saveProfile } from "@/components/ProfileFields";
+import { saveGuideHandoff } from "@/components/guideHandoff";
 import { US_STATES, type UsState } from "@/lib/schema";
 import { money } from "@/lib/format";
 import {
@@ -56,7 +57,16 @@ export default function GuidePage() {
         homeCharging: a.homeCharging,
       });
       const market = await fetchMarket(a.state);
-      setRec(recommend(a, market));
+      const r = recommend(a, market);
+      // Carry the recommendation's context to the detail pages so clicking a
+      // module card lands pre-filled with the same objective, model, and commute.
+      saveGuideHandoff({
+        objective: a.objective,
+        vehicleId: r.model.id,
+        oneWayMiles: a.oneWayMiles,
+        daysPerWeek: a.daysPerWeek,
+      });
+      setRec(r);
     } finally {
       setPending(false);
     }

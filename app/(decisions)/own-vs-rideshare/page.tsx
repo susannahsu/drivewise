@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useStoredProfile } from "@/components/ProfileFields";
-import { useAutoRun } from "@/components/useAutoRun";
+import { useAutoRun, useHydrated } from "@/components/useAutoRun";
+import { loadGuideHandoff } from "@/components/guideHandoff";
 import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { BreakEvenChart, SERIES_COLORS } from "@/components/BreakEvenChart";
 import { CarImage } from "@/components/CarImage";
@@ -31,17 +32,28 @@ export default function OwnVsRidesharePage() {
   const [departTime, setDepartTime] = useState("08:00");
   const [returnTime, setReturnTime] = useState("17:30");
   const [perMile, setPerMile] = useState(DEFAULT_FARE_MODEL.perMile);
+  const seeded = useRef(false);
 
   async function run() {
     setPending(true);
     try {
       setMarket(await fetchMarket(profile.state));
+      // Once, on first load: adopt the model + commute from the guided flow.
+      if (!seeded.current) {
+        seeded.current = true;
+        const h = loadGuideHandoff();
+        if (h.vehicleId && SEED_VEHICLES.some((v) => v.id === h.vehicleId)) {
+          setVehicleId(h.vehicleId);
+        }
+        if (typeof h.oneWayMiles === "number") setOneWayMiles(h.oneWayMiles);
+        if (typeof h.daysPerWeek === "number") setDaysPerWeek(h.daysPerWeek);
+      }
     } finally {
       setPending(false);
     }
   }
 
-  useAutoRun(run);
+  useAutoRun(run, useHydrated());
 
   const analysis = useMemo(() => {
     if (!market) return null;

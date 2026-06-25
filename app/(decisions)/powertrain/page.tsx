@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
-import { useAutoRun } from "@/components/useAutoRun";
+import { useAutoRun, useHydrated } from "@/components/useAutoRun";
 import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { CostBreakdown } from "@/components/CostBreakdown";
 import { Assumptions } from "@/components/Assumptions";
@@ -55,7 +55,7 @@ export default function PowertrainPage() {
     }
   }
 
-  useAutoRun(run);
+  useAutoRun(run, useHydrated());
 
   const analysis = useMemo(() => {
     if (!market) return null;

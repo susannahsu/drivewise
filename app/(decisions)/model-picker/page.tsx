@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
-import { useAutoRun } from "@/components/useAutoRun";
+import { useAutoRun, useHydrated } from "@/components/useAutoRun";
+import { loadGuideHandoff } from "@/components/guideHandoff";
 import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { CarImage } from "@/components/CarImage";
 import { computeTco, type MarketInputs } from "@/lib/tco";
@@ -31,6 +32,7 @@ export default function ModelPickerPage() {
   const [gas, setGas] = useState(3.5);
   const [miles, setMiles] = useState(12000);
   const [years, setYears] = useState(5);
+  const seeded = useRef(false);
 
   async function run() {
     setPending(true);
@@ -40,12 +42,20 @@ export default function ModelPickerPage() {
       setGas(round(m.gasPricePerGallon, 2));
       setMiles(profile.annualMiles);
       setYears(Math.max(1, Math.round(profile.ownershipYears)));
+      // Once, on first load: adopt the objective chosen in the guided flow.
+      if (!seeded.current) {
+        seeded.current = true;
+        const h = loadGuideHandoff();
+        if (h.objective && h.objective in OBJECTIVES) {
+          setObjective(h.objective as Objective);
+        }
+      }
     } finally {
       setPending(false);
     }
   }
 
-  useAutoRun(run);
+  useAutoRun(run, useHydrated());
 
   const rows = useMemo(() => {
     if (!market) return null;

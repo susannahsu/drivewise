@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ProfileFields, useStoredProfile } from "@/components/ProfileFields";
-import { useAutoRun } from "@/components/useAutoRun";
+import { useAutoRun, useHydrated } from "@/components/useAutoRun";
+import { loadGuideHandoff } from "@/components/guideHandoff";
 import { ResultsSkeleton } from "@/components/ResultsSkeleton";
 import { CostBreakdown } from "@/components/CostBreakdown";
 import { Assumptions } from "@/components/Assumptions";
@@ -23,18 +24,30 @@ export default function AcquisitionPage() {
   const [vehicleId, setVehicleId] = useState(SEED_VEHICLES[0].id);
   const [analysis, setAnalysis] = useState<AcquisitionAnalysis | null>(null);
   const [pending, setPending] = useState(false);
+  const seeded = useRef(false);
   const selected = SEED_VEHICLES.find((v) => v.id === vehicleId)!;
 
   async function run() {
     setPending(true);
     try {
-      setAnalysis(await compareAcquisition({ ...profile, vehicleId }));
+      // Once, on first load: adopt the model the guided flow recommended, and
+      // use it for this very comparison (state update is async, so pass it in).
+      let vid = vehicleId;
+      if (!seeded.current) {
+        seeded.current = true;
+        const h = loadGuideHandoff();
+        if (h.vehicleId && SEED_VEHICLES.some((v) => v.id === h.vehicleId)) {
+          vid = h.vehicleId;
+          setVehicleId(vid);
+        }
+      }
+      setAnalysis(await compareAcquisition({ ...profile, vehicleId: vid }));
     } finally {
       setPending(false);
     }
   }
 
-  useAutoRun(run);
+  useAutoRun(run, useHydrated());
 
   return (
     <main className="mx-auto flex max-w-3xl flex-1 flex-col gap-8 px-6 py-12">
