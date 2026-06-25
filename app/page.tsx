@@ -20,7 +20,7 @@ const DECISIONS = [
     icon: "🚙",
     title: "Which car should we buy?",
     blurb:
-      "The 20-car best-value shortlist, ranked for you — with real EPA mileage and photos.",
+      "The 21-car best-value shortlist, ranked for you — with real EPA mileage and photos.",
   },
   {
     href: "/acquisition",

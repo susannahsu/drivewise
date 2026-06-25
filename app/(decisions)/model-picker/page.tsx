@@ -103,7 +103,7 @@ export default function ModelPickerPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Which car?</h1>
         <p className="mt-1 text-zinc-600 dark:text-zinc-300">
-          The 20-car best-value shortlist, ranked for your situation. MPG is real
+          The 21-car best-value shortlist, ranked for your situation. MPG is real
           EPA data; drag the sliders to see the ranking shift live.
         </p>
       </div>

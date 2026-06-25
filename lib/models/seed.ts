@@ -2,7 +2,7 @@ import { VehicleSchema, type Vehicle } from "@/lib/schema";
 
 /**
  * Seed catalog for US-3 (model picker), drawn from docs/CAR_SHORTLIST.md — the
- * 20 best-value picks for a 1-car, no-home-charging household (hybrids + efficient
+ * best-value picks for a 1-car, no-home-charging household (hybrids + efficient
  * gas; pure EVs intentionally excluded given public-charging costs).
  *
  * combinedMpg is EPA-calibrated from fueleconomy.gov (scripts/calibrate-mpg.mjs).
@@ -17,6 +17,10 @@ import { VehicleSchema, type Vehicle } from "@/lib/schema";
 const SEED: Vehicle[] = [
   // Tier 1 — highest value
   { id: "toyota-corolla-hybrid-2026", make: "Toyota", model: "Corolla Hybrid", year: 2026, powertrain: "hybrid", bodyStyle: "compact", msrp: 25000, combinedMpg: 50, resaleRatio5yr: 0.75, reliability: 0.86 },
+  // Prius: efficiency champ (EPA 57 combined, base LE FWD). Costs more than the
+  // Corolla Hybrid so it rarely wins lowest-TCO, but tops the "best efficiency"
+  // lens and holds value well.
+  { id: "toyota-prius-2026", make: "Toyota", model: "Prius", year: 2026, powertrain: "hybrid", bodyStyle: "compact", msrp: 28350, combinedMpg: 57, resaleRatio5yr: 0.64, reliability: 0.86 },
   { id: "toyota-corolla-2026", make: "Toyota", model: "Corolla", year: 2026, powertrain: "gas", bodyStyle: "compact", msrp: 24120, combinedMpg: 34, resaleRatio5yr: 0.74, reliability: 0.86 },
   { id: "honda-civic-2026", make: "Honda", model: "Civic", year: 2026, powertrain: "gas", bodyStyle: "compact", msrp: 25890, combinedMpg: 38, resaleRatio5yr: 0.77, reliability: 0.76 },
   // EPA Civic Hybrid ~49 combined (calibration matched the gas "Civic 4Dr" trim)

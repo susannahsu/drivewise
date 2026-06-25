@@ -4,10 +4,11 @@ import { SEED_VEHICLES } from "./seed";
 import { computeTco, type MarketInputs } from "@/lib/tco";
 
 describe("seed catalog", () => {
-  it("has 20 validated, unique vehicles", () => {
-    expect(SEED_VEHICLES).toHaveLength(20);
+  it("has a full catalog of validated, unique vehicles", () => {
+    expect(SEED_VEHICLES.length).toBeGreaterThanOrEqual(20);
     const ids = new Set(SEED_VEHICLES.map((v) => v.id));
-    expect(ids.size).toBe(20);
+    // Every id is unique (no accidental duplicate entries).
+    expect(ids.size).toBe(SEED_VEHICLES.length);
   });
 
   it("every vehicle has the efficiency field its powertrain needs", () => {

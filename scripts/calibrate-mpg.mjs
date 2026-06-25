@@ -12,6 +12,7 @@ const YEARS = [2026, 2025, 2024];
 
 const SEED = [
   { id: "toyota-corolla-hybrid-2026", make: "Toyota", model: "Corolla Hybrid", pt: "hybrid" },
+  { id: "toyota-prius-2026", make: "Toyota", model: "Prius", pt: "hybrid" },
   { id: "toyota-corolla-2026", make: "Toyota", model: "Corolla", pt: "gas" },
   { id: "honda-civic-2026", make: "Honda", model: "Civic", pt: "gas" },
   { id: "honda-civic-hybrid-2026", make: "Honda", model: "Civic Hybrid", pt: "hybrid" },

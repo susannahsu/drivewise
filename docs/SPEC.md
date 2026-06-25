@@ -231,7 +231,7 @@ docs/
 **Phase 2 — The four decision views (shallow)** ✅ _done_
 - ✅ US-1 powertrain (gas/hybrid/EV head-to-head, live prices, breakdown).
 - ✅ US-2 own-vs-rideshare (modeled surge fares + break-even days/week).
-- ✅ US-3 model picker (ranks the 20-car seed list by chosen objective).
+- ✅ US-3 model picker (ranks the seed catalog by chosen objective).
 - ✅ US-4 acquisition (finance-new vs buy-used vs lease, cheapest highlighted).
 - Shared: localStorage-persisted profile, CostBreakdown bars, server actions
   that fetch market data and run the engine. Verified end-to-end in-browser.
@@ -258,7 +258,7 @@ docs/
 - **Insurance & depreciation:** ✅ resolved — Apify insurance estimator +
   Auto.dev free listings (depreciation) + CarEdge defaults. Marketcheck dropped
   from MVP (Auto.dev free tier covers listings). See data-sources doc.
-- **Catalog:** ✅ resolved — seed shortlist of 20 best-value models in
+- **Catalog:** ✅ resolved — seed shortlist of best-value models in
   [`CAR_SHORTLIST.md`](CAR_SHORTLIST.md). Still worth personalizing to body
   style / budget / used-vs-new (see that doc's to-do).
 - **Two cars or one?** ✅ resolved — **one car.** US-5 (two-car household

@@ -26,6 +26,7 @@ Prices are approximate 2026 starting MSRP; treat as ballpark.
 | # | Model | Type | ~MSRP | Why it's here |
 |---|-------|------|-------|----------------|
 | 1 | **Toyota Corolla Hybrid** | Compact sedan/hatch | $24–27k | ~50 MPG, legendary reliability, low depreciation. The default "smart money" pick for 2026. |
+| 1b | **Toyota Prius** | Compact hatch | ~$28k | The efficiency champ — **57 MPG combined (EPA)**, strong resale, Toyota-hybrid reliability. Costs more than the Corolla Hybrid so it rarely wins *lowest total cost*, but it's #1 for the "best fuel economy" objective and holds value well. Added after the initial 20 because omitting it made the efficiency ranking wrong. |
 | 2 | **Toyota Corolla (gas)** | Compact sedan/hatch | ~$24k | Lowest 5-yr cost of ownership in 2026 rankings; cheap parts, slow depreciation. |
 | 3 | **Honda Civic** | Compact sedan/hatch | ~$26k | Reliability + strong resale + 35+ MPG; nicer to drive than the Corolla. |
 | 4 | **Honda Civic Hybrid** | Compact sedan/hatch | ~$29k | Civic durability + ~48 MPG; great if your annual miles are high. |

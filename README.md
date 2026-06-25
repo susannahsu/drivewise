@@ -28,7 +28,7 @@ standalone tool you can open directly:
 |----------|----------|----------------|
 | **Powertrain** | Hybrid, gas, or electric? | Live gas/electricity for your state, your mileage, whether you can charge at home, and **EV incentives** (federal + state) |
 | **Own vs Uber** | Buy, lease, or just rideshare? | Your real commute with rush-hour surge vs the fixed cost of owning/leasing |
-| **Which model** | Best car for *you*? | A 20-car best-value shortlist ranked by your priority — lowest cost, efficiency, resale, or reliability |
+| **Which model** | Best car for *you*? | A 21-car best-value shortlist ranked by your priority — lowest cost, efficiency, resale, or reliability |
 | **How to pay** | Lease, buy new, or buy used? | Depreciation curves, live loan rates, and how long you'll keep it |
 
 On top of that: total cost of ownership over your real horizon, **what-if
@@ -70,7 +70,7 @@ Two features make it useful at the moment of decision, not just for research:
 ### Which car should I buy?
 
 ![Model picker ranked by reliability](public/models.png)
-*The 20-car best-value shortlist ranked for "Most reliable" in CA. Each card shows powertrain, real EPA MPG, iSeeCars 5-yr resale ratio, and NHTSA complaint-weighted reliability. Car photos fetched from Wikipedia. Drag the gas/mileage/years sliders to watch rankings shift live.*
+*The 21-car best-value shortlist ranked for "Most reliable" in CA. Each card shows powertrain, real EPA MPG, iSeeCars 5-yr resale ratio, and NHTSA complaint-weighted reliability. Car photos fetched from Wikipedia. Drag the gas/mileage/years sliders to watch rankings shift live.*
 
 ### Lease, buy new, or buy used?
 
@@ -196,7 +196,7 @@ lib/
   tco/                    # pure TCO engine — one module per cost line
     incentives.ts         # federal + state EV credits, netted off price
   data/                   # live-price fetchers (EIA, FRED, Auto.dev) + fallbacks
-  models/                 # the calibrated 20-car seed catalog
+  models/                 # the calibrated 21-car seed catalog
   recommend.ts            # composes all four modules into one recommendation
   deal.ts                 # pure "rate my deal" grading (price + financing)
 components/               # charts, car images, deal rater, assumptions, inputs
